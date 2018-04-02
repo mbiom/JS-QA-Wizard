@@ -66,7 +66,7 @@ for (var i = 0; i < qaTemplate.length; i++) {
 }
 
 var qaProgress = [qaTemplate[0]];
-var output = null;
+var strOutput = [];
 
 function determineNextQuery(lastQuery, lastAnswer) {
 	var numNextQ = -1;
@@ -133,9 +133,12 @@ $(document).ready(function(){
 		}
 
 		qaProgress[curStep+1] = determineNextQuery(qaProgress[curStep]['vname'], qaProgress[curStep]['value']);
+		if (qaProgress[curStep+1] === null) {
+			$('#btnNext').toggle(false);
+			return;
+		}
 
 		curStep++;
-
 		showStep(curStep);
 	});
 
@@ -156,10 +159,6 @@ $(document).ready(function(){
 	});
 
 	function showStep (stepNum) {
-		if (qaProgress[stepNum] === null) {
-			$('#btnNext').toggle(false);
-			return;
-		}
 
 		var stepData = qaProgress[stepNum];
 		$('#labelQ').html(stepData['q']);
@@ -176,10 +175,18 @@ $(document).ready(function(){
 	function showDecInfo() {
 		var str = '';
 		for (var i = 0; i < qaProgress.length; i++) {
+			if (!qaProgress[i])
+				continue;
+
 			if (qaProgress[i]['value'])
 				str += "<br />" + qaProgress[i]['vname'] + ": " + qaProgress[i]['value'];
 		}
 
 		$("#divInfo").html(str);
+
+		var hasOutput = true;
+		for (var i = 0; i < 3; i++) {
+			hasOutput = hasOutput && qaProgress[i] && qaProgress[i]['value'];
+		}
 	}
 });
