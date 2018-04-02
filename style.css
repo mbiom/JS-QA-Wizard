@@ -1,0 +1,44 @@
+.container {
+	background-color: ghostwhite;
+}
+.app-title {
+	color: dodgerblue;
+	font-style: italic;
+	height: 80px;
+}
+.content-row {
+	height: 600px;
+	border-top: 2px solid dodgerblue;
+	border-bottom: 2px solid dodgerblue;
+}
+.qanda {
+	border-left: 2px solid dodgerblue;
+	border-right: 2px solid dodgerblue;
+	height: 100%;
+	padding: 100px 50px 100px 50px;
+}
+.qanda input {
+	width: 70%;
+	margin: auto 0 auto auto;
+}
+.qanda label {
+	color: maroon;
+	font-size: 18px;
+	margin-bottom: 20px;
+	height: 60px;
+}
+.qanda .button-group {
+	text-align: center;
+}
+.qanda .form-group {
+	margin-bottom: 50px;
+}
+.btn-gray {
+	background-color: lightgray;
+}
+.info {
+	color: maroon;
+}
+.h3 {
+	font-style: italic;
+}
