@@ -55,10 +55,41 @@ var qaTemplate = [
 		'vname': 'NumLivingSiblings',
 	}, // 10
 	{
+		'q': "What are the living siblings' names?",
+		'ph': "Separate names with comma(,)",
+		'vname': 'NamesLivingSiblings',
+	}, // 11
+	{
 		'q': "How Many deceased siblings does the decedent have?",
 		'ph': "Enter number",
 		'vname': 'NumDeceasedSiblings',
-	}, // 11
+	}, // 12
+	{
+		'q': "What are the deceased siblings' names?",
+		'ph': "Separate names with comma(,)",
+		'vname': 'NamesDeceasedSiblings',
+	}, // 13
+	{
+		'q': "Did DEAD SIB #K have any children?",
+		'ph': "Enter Y or N",
+		'vname': 'HadDeadSibChild',
+		'dsnum': 1,
+		'value': null
+	}, // 14
+	{
+		'q': "How many children does DEAD SIB #K have?",
+		'ph': "Enter number",
+		'vname': 'NumDeadSibChild',
+		'dsnum': 1,
+		'value': null
+	}, // 15
+	{
+		'q': "What are the names of kis of DEAD SIB #K?",
+		'ph': "Enter number",
+		'vname': 'NamesDeadSibChild',
+		'dsnum': 1,
+		'value': null
+	}, // 16
 ];
 
 for (var i = 0; i < qaTemplate.length; i++) {
@@ -113,7 +144,33 @@ function determineNextQuery(lastQuery, lastAnswer) {
 				numNextQ = 10;
 			break;
 		case "NumLivingSiblings":
-			numNextQ = 11;
+			if (lastAnswer > 0)
+				numNextQ = 11;
+			else
+				numNextQ = 12;
+			break;
+		case "NamesLivingSiblings":
+			numNextQ = 12;
+			break;
+		case "NumDeceasedSiblings":
+			if (lastAnswer > 0) 
+				numNextQ = 13
+			break;
+		case "NamesDeceasedSiblings":
+			numNextQ = 14
+			break;
+		case "HadDeadSibChild":
+			if (lastAnswer == 'Y')
+				numNextQ = 15;
+			else
+				numNextQ = 14;
+			break;
+		case "NumDeadSibChild":
+			numNextQ = 16;
+			break;
+		case "NamesDeadSibChild":
+			numNextQ = 14
+			break;
 		default:
 			numNextQ = -1;
 	}
@@ -134,6 +191,7 @@ $(document).ready(function(){
 
 		qaProgress[curStep+1] = determineNextQuery(qaProgress[curStep]['vname'], qaProgress[curStep]['value']);
 		if (qaProgress[curStep+1] === null) {
+			alert('Then End!');
 			$('#btnNext').toggle(false);
 			return;
 		}
@@ -177,7 +235,7 @@ $(document).ready(function(){
 		for (var i = 0; i < qaProgress.length; i++) {
 			if (!qaProgress[i])
 				continue;
-
+			
 			if (qaProgress[i]['value'])
 				str += "<br />" + qaProgress[i]['vname'] + ": " + qaProgress[i]['value'];
 		}
@@ -187,6 +245,11 @@ $(document).ready(function(){
 		var hasOutput = true;
 		for (var i = 0; i < 3; i++) {
 			hasOutput = hasOutput && qaProgress[i] && qaProgress[i]['value'];
+		}
+		if (hasOutput) {
+			strOutput = qaProgress[0]['value'] + " who was a ";
+			strOutput += qaProgress[1]['value'] == 'M' ? 'male' : 'famale';
+			strOutput += " died on " + qaProgress[2]['value'];
 		}
 	}
 });
