@@ -1,91 +1,100 @@
+var ansValid = [
+	"Enter full name", // 0
+	"Enter M or F", // 1
+	"Enter date of death", // 2
+	"Enter Y or N", // 3
+	"Separate names with comma(,)", // 4
+	"Enter positive number", // 5
+];
+
 var qaTemplate = [
 	{
 		'q': "What is the decedent's name?",
-		'ph': "Enter full name",
+		'ph': 0,
 		'vname': 'Name',
 	}, // 0
 	{
 		'q': "Was decedent male or famale?",
-		'ph': "Enter M or F",
+		'ph': 1,
 		'vname': 'Gender',
 	}, // 1
 	{
 		'q': "What is the date of death of a decedent?",
-		'ph': "Enter date of death",
+		'ph': 2,
 		'vname': 'DeathDate',
 	}, // 2
 	{
 		'q': "Did the Decedent have biological or legally adopted children?",
-		'ph': "Enter Y or N",
+		'ph': 3,
 		'vname': 'HasChild',
 	}, // 3
 	{
 		'q': "What are the names of the kids?",
-		'ph': "Separate names with comma(,)",
+		'ph': 4,
 		'vname': 'NameKids',
 	}, // 4
 	{
 		'q': "Was the decedent married when he/she died?",
-		'ph': "Enter Y or N",
+		'ph': 3,
 		'vname': 'Married',
 	}, // 5
 	{
 		'q': "What is the name of the Spouse?",
-		'ph': "Enter name",
+		'ph': 0,
 		'vname': 'NameSpouse',
 	}, // 6
 	{
 		'q': "Was the Decedent survived by parent(s)?",
-		'ph': "Enter Y or N",
+		'ph': 3,
 		'vname': 'Survived',
 	}, // 7
 	{
 		'q': "What are the parents' names?",
-		'ph': "Enter names",
+		'ph': 4,
 		'vname': 'NameParents',
 	}, // 8
 	{
 		'q': "Does the decedent have any sibling(s), whether currently living or not?",
-		'ph': "Enter Y or N",
+		'ph': 3,
 		'vname': 'HasSibling',
 	}, // 9
 	{
 		'q': "How many living siblings does the decedent have?",
-		'ph': "Enter number",
+		'ph': 5,
 		'vname': 'NumLivingSiblings',
 	}, // 10
 	{
 		'q': "What are the living siblings' names?",
-		'ph': "Separate names with comma(,)",
+		'ph': 4,
 		'vname': 'NamesLivingSiblings',
 	}, // 11
 	{
 		'q': "How Many deceased siblings does the decedent have?",
-		'ph': "Enter number",
+		'ph': 5,
 		'vname': 'NumDeceasedSiblings',
 	}, // 12
 	{
 		'q': "What are the deceased siblings' names?",
-		'ph': "Separate names with comma(,)",
+		'ph': 4,
 		'vname': 'NamesDeceasedSiblings',
 	}, // 13
 	{
 		'q': "Did DEAD SIB #K have any children?",
-		'ph': "Enter Y or N",
+		'ph': 3,
 		'vname': 'HadDeadSibChild',
 		'dsnum': 1,
 		'value': null
 	}, // 14
 	{
 		'q': "How many children does DEAD SIB #K have?",
-		'ph': "Enter number",
+		'ph': 5,
 		'vname': 'NumDeadSibChild',
 		'dsnum': 1,
 		'value': null
 	}, // 15
 	{
 		'q': "What are the names of kis of DEAD SIB #K?",
-		'ph': "Enter number",
+		'ph': 4,
 		'vname': 'NamesDeadSibChild',
 		'dsnum': 1,
 		'value': null
@@ -176,18 +185,81 @@ function determineNextQuery(lastQuery, lastAnswer) {
 	}
 
 	var nextQuery = numNextQ == -1 ? null : qaTemplate[numNextQ];
+
+	if (numNextQ == 14) {
+		var lastDsNum = qaProgress[qaProgress.length - 1]['dsnum'];
+		var numDeadSibs = getAnswerByQName("NumDeceasedSiblings");
+		console.log('lastDsNum', lastDsNum);
+		console.log('numDeadSibs', numDeadSibs);
+
+		if (lastDsNum && numDeadSibs && lastDsNum >= numDeadSibs)
+			return null;
+
+		if (!lastDsNum)
+			lastDsNum = 1;
+		else
+			lastDsNum ++;
+
+		nextQuery = populateDSNumToQuery(lastDsNum, nextQuery);
+	}
+
+	if (numNextQ == 15 || numNextQ == 16) {
+		var lastDsNum = qaProgress[qaProgress.length - 1]['dsnum'];
+		if (lastDsNum) 
+			nextQuery = populateDSNumToQuery(lastDsNum, nextQuery);
+	}
+
 	return nextQuery;
 }
 
+function populateDSNumToQuery(dsNum, query) {
+	var newQuery = {};
+	for (key in query)
+		newQuery[key] = query[key]
+
+	newQuery['q'] = query['q'].replace("#K", dsNum);
+	newQuery['dsnum'] = dsNum;
+	return newQuery;
+}
+
+function getAnswerByQName(qname) {
+	for (var i = 0; i < qaProgress.length; i++) {
+		if (qaProgress[i]['vname'] == qname)
+			return qaProgress[i]['value'];
+	}
+}
+
+function validateAnswer(answer, validNum) {
+	answer = answer.trim();
+	if (answer.length == 0)
+		return false;
+	switch (validNum) {
+		case 1:
+			return answer=='M' || answer=='F';
+		case 3:
+			return answer=='Y' || answer=='N';
+		case 5:
+			return parseInt(answer) == answer;
+		default:
+			return true;
+	}
+}
 var curStep = 0;
 $(document).ready(function(){
 	showStep(0);
+	$('#txtAnswer').focus();
 
 	$('#btnNext').click(function() {
-		if ($('#txtAnswer').val()) {
-			qaProgress[curStep]['value'] = $('#txtAnswer').val();
-			showDecInfo();
+		if ( !validateAnswer( $('#txtAnswer').val(), qaProgress[curStep]['ph'] ) ) {
+			$('.form-group').addClass('has-error');
+			alert (ansValid[qaProgress[curStep]['ph']]);
+			return;
 		}
+		else
+			$('.form-group').removeClass('has-error');
+
+		qaProgress[curStep]['value'] = $('#txtAnswer').val();
+		showDecInfo();
 
 		qaProgress[curStep+1] = determineNextQuery(qaProgress[curStep]['vname'], qaProgress[curStep]['value']);
 		if (qaProgress[curStep+1] === null) {
@@ -220,13 +292,19 @@ $(document).ready(function(){
 
 		var stepData = qaProgress[stepNum];
 		$('#labelQ').html(stepData['q']);
-		$('#txtAnswer').attr('placeholder', stepData['ph']);
+		$('#txtAnswer').attr('placeholder', ansValid[stepData['ph']]);
 		if (stepData['value'])
 			$('#txtAnswer').val(stepData['value']);
 		else
 			$('#txtAnswer').val('');	
 
-		$('#btnPrev').toggle(stepNum>0);
+		if (stepNum == 0) {
+			$('#btnPrev').hide();
+			$('#btnNext').show();
+		}
+		else
+			$('#btnPrev').show();
+		
 		$('#txtAnswer').focus();
 	}
 
