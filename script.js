@@ -71,12 +71,12 @@ var qaTemplate = [
 	{
 		'q': "How Many deceased siblings does the decedent have?",
 		'ph': 5,
-		'vname': 'NumDeceasedSiblings',
+		'vname': 'NumDeadSiblings',
 	}, // 12
 	{
 		'q': "What are the deceased siblings' names?",
 		'ph': 4,
-		'vname': 'NamesDeceasedSiblings',
+		'vname': 'NamesDeadSiblings',
 	}, // 13
 	{
 		'q': "Did DEAD SIB #K have any children?",
@@ -106,7 +106,6 @@ for (var i = 0; i < qaTemplate.length; i++) {
 }
 
 var qaProgress = [qaTemplate[0]];
-var strOutput = [];
 
 function determineNextQuery(lastQuery, lastAnswer) {
 	var numNextQ = -1;
@@ -161,11 +160,11 @@ function determineNextQuery(lastQuery, lastAnswer) {
 		case "NamesLivingSiblings":
 			numNextQ = 12;
 			break;
-		case "NumDeceasedSiblings":
+		case "NumDeadSiblings":
 			if (lastAnswer > 0) 
 				numNextQ = 13
 			break;
-		case "NamesDeceasedSiblings":
+		case "NamesDeadSiblings":
 			numNextQ = 14
 			break;
 		case "HadDeadSibChild":
@@ -188,7 +187,7 @@ function determineNextQuery(lastQuery, lastAnswer) {
 
 	if (numNextQ == 14) {
 		var lastDsNum = qaProgress[qaProgress.length - 1]['dsnum'];
-		var numDeadSibs = getAnswerByQName("NumDeceasedSiblings");
+		var numDeadSibs = getAnswerByQName("NumDeadSiblings");
 		console.log('lastDsNum', lastDsNum);
 		console.log('numDeadSibs', numDeadSibs);
 
@@ -224,9 +223,11 @@ function populateDSNumToQuery(dsNum, query) {
 
 function getAnswerByQName(qname) {
 	for (var i = 0; i < qaProgress.length; i++) {
+		if (!qaProgress[i]) continue;
 		if (qaProgress[i]['vname'] == qname)
 			return qaProgress[i]['value'];
 	}
+	return null;
 }
 
 function validateAnswer(answer, validNum) {
@@ -244,6 +245,45 @@ function validateAnswer(answer, validNum) {
 			return true;
 	}
 }
+
+function showOutputString() {
+	var strOutput = "<div class='h3'>Output</div>";
+	for (var i = 0; i < qaProgress.length; i++) {
+		if (!qaProgress[i]) continue;
+		if (i == 3) {
+			strOutput += qaProgress[0]['value'] + " was a ";
+			strOutput += (qaProgress[1]['value']=='M'?'male':'famale') + " died on ";
+			strOutput += qaProgress[2]['value'] + ".<br>";
+		}
+		if (qaProgress[i]['vname'] == 'HasChild' && qaProgress[i]['value'] == 'N')
+			strOutput += "The Decedent had no biological or legally adopted children.<br>";
+		
+		if (qaProgress[i]['vname'] == 'Married' && qaProgress[i]['value'] == 'N')
+			strOutput += "The Decedent was not married.<br>";
+
+		if (qaProgress[i]['vname'] == 'Survived' && qaProgress[i]['value'] == 'Y')
+			strOutput += "Parents inherit te estate.<br>";
+
+		if (qaProgress[i]['vname'] == 'HasSibling' && qaProgress[i]['value'] == 'N')
+			strOutput += "You indicated that the decedent has no living or deceased siblings! Let’s talk about aunts and uncles.<br>";
+
+		if (qaProgress[i]['vname'] == 'NumDeadSiblings' && qaProgress[i]['value'] > 0) {
+			var numDeadSibs = parseInt(qaProgress[i]['value']);
+			var numLivingSibs = parseInt(getAnswerByQName('NumLivingSiblings'));
+			if (numLivingSibs > 0)
+			strOutput += "There are "+numLivingSibs+" living siblings, and "+qaProgress[i]['value']+" deceased siblings of the decedent.<br>";
+
+			strOutput += "The living siblings will each inherit 1/"+(numLivingSibs+numDeadSibs)+" of the estate.<br>";
+		}
+
+		if (qaProgress[i]['dsnum'] && qaProgress[i]['vname'] == 'NumDeadSibChild' && qaProgress[i]['value'] > 0) {
+			strOutput += "The children of DEAD SIB "+qaProgress[i]['dsnum']+" will each inherit (1/"+(parseInt(getAnswerByQName('NumLivingSiblings'))+parseInt(getAnswerByQName('NumDeadSiblings')))+") * (1/"+parseInt(qaProgress[i]['value'])+").<br>";
+		}
+	}
+
+	$('.output').html(strOutput);
+}
+
 var curStep = 0;
 $(document).ready(function(){
 	showStep(0);
@@ -263,7 +303,7 @@ $(document).ready(function(){
 
 		qaProgress[curStep+1] = determineNextQuery(qaProgress[curStep]['vname'], qaProgress[curStep]['value']);
 		if (qaProgress[curStep+1] === null) {
-			alert('Then End!');
+			showOutputString();
 			$('#btnNext').toggle(false);
 			return;
 		}

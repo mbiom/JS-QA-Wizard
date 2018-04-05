@@ -7,7 +7,7 @@
 	height: 80px;
 }
 .content-row {
-	height: 600px;
+	height: 800px;
 	border-top: 2px solid dodgerblue;
 	border-bottom: 2px solid dodgerblue;
 }
@@ -41,4 +41,13 @@
 }
 .h3 {
 	font-style: italic;
+}
+.output {
+	text-align: center;
+    margin-top: 50px;
+    font-size: 16px;
+    border: 1px solid dodgerblue;
+    border-radius: 2px;
+    color: maroon;
+    line-height: 25px;
 }
