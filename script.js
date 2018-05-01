@@ -1,105 +1,3 @@
-var ansValid = [
-	"Enter full name", // 0
-	"Enter M or F", // 1
-	"Enter date of death", // 2
-	"Enter Y or N", // 3
-	"Separate names with comma(,)", // 4
-	"Enter positive number", // 5
-];
-
-var qaTemplate = [
-	{
-		'q': "What is the decedent's name?",
-		'ph': 0,
-		'vname': 'Name',
-	}, // 0
-	{
-		'q': "Was decedent male or famale?",
-		'ph': 1,
-		'vname': 'Gender',
-	}, // 1
-	{
-		'q': "What is the date of death of a decedent?",
-		'ph': 2,
-		'vname': 'DeathDate',
-	}, // 2
-	{
-		'q': "Did the Decedent have biological or legally adopted children?",
-		'ph': 3,
-		'vname': 'HasChild',
-	}, // 3
-	{
-		'q': "What are the names of the kids?",
-		'ph': 4,
-		'vname': 'NameKids',
-	}, // 4
-	{
-		'q': "Was the decedent married when he/she died?",
-		'ph': 3,
-		'vname': 'Married',
-	}, // 5
-	{
-		'q': "What is the name of the Spouse?",
-		'ph': 0,
-		'vname': 'NameSpouse',
-	}, // 6
-	{
-		'q': "Was the Decedent survived by parent(s)?",
-		'ph': 3,
-		'vname': 'Survived',
-	}, // 7
-	{
-		'q': "What are the parents' names?",
-		'ph': 4,
-		'vname': 'NameParents',
-	}, // 8
-	{
-		'q': "Does the decedent have any sibling(s), whether currently living or not?",
-		'ph': 3,
-		'vname': 'HasSibling',
-	}, // 9
-	{
-		'q': "How many living siblings does the decedent have?",
-		'ph': 5,
-		'vname': 'NumLivingSiblings',
-	}, // 10
-	{
-		'q': "What are the living siblings' names?",
-		'ph': 4,
-		'vname': 'NamesLivingSiblings',
-	}, // 11
-	{
-		'q': "How Many deceased siblings does the decedent have?",
-		'ph': 5,
-		'vname': 'NumDeadSiblings',
-	}, // 12
-	{
-		'q': "What are the deceased siblings' names?",
-		'ph': 4,
-		'vname': 'NamesDeadSiblings',
-	}, // 13
-	{
-		'q': "Did DEAD SIB #K have any children?",
-		'ph': 3,
-		'vname': 'HadDeadSibChild',
-		'dsnum': 1,
-		'value': null
-	}, // 14
-	{
-		'q': "How many children does DEAD SIB #K have?",
-		'ph': 5,
-		'vname': 'NumDeadSibChild',
-		'dsnum': 1,
-		'value': null
-	}, // 15
-	{
-		'q': "What are the names of kis of DEAD SIB #K?",
-		'ph': 4,
-		'vname': 'NamesDeadSibChild',
-		'dsnum': 1,
-		'value': null
-	}, // 16
-];
 
 for (var i = 0; i < qaTemplate.length; i++) {
 	qaTemplate['value'] = null;
@@ -114,70 +12,69 @@ function determineNextQuery(lastQuery, lastAnswer) {
 			numNextQ = 1;
 			break;
 		case "Gender":
+			$('#txtAnswer').datepicker({ dateFormat: "M d, yy" });
 			numNextQ = 2;
 			break;
 		case "DeathDate":
+			$('#txtAnswer').datepicker( "destroy" );
 			numNextQ = 3;
 			break;
 		case "HasChild":
-			if (lastAnswer == 'Y')
-				numNextQ = 4;
-			else
-				numNextQ = 5;
+			numNextQ = 4;
 			break;
-		case "NameKids":
-			numNextQ = 5;
-			break;
+		// case "NameKids":
+		// 	numNextQ = 5;
+		// 	break;
 		case "Married":
-			if (lastAnswer == 'Y')
-				numNextQ = 6;
-			else if (qaProgress[3]['value'] == 'Y')
+			if (lastAnswer.toLowerCase() == 'y')
+				numNextQ = 5;
+			else if (qaProgress[3]['value'].toLowerCase() == 'y')
 				numNextQ = -1;
 			else
-				numNextQ = 7;
+				numNextQ = 6;
 			break;
 		case "NameSpouse":
 			numNextQ = -1;
 			break;
 		case "Survived":
-			if (lastAnswer == 'Y')
-				numNextQ = 8;
+			if (lastAnswer.toLowerCase() == 'y')
+				numNextQ = 7;
 			else
-				numNextQ = 9;
+				numNextQ = 8;
 			break;
 		case "NameParents":
 			break;
 		case "HasSibling":
-			if (lastAnswer == 'Y')
-				numNextQ = 10;
+			if (lastAnswer.toLowerCase() == 'y')
+				numNextQ = 9;
 			break;
 		case "NumLivingSiblings":
 			if (lastAnswer > 0)
-				numNextQ = 11;
+				numNextQ = 10;
 			else
-				numNextQ = 12;
+				numNextQ = 11;
 			break;
 		case "NamesLivingSiblings":
-			numNextQ = 12;
+			numNextQ = 11;
 			break;
 		case "NumDeadSiblings":
 			if (lastAnswer > 0) 
-				numNextQ = 13
+				numNextQ = 12
 			break;
 		case "NamesDeadSiblings":
-			numNextQ = 14
+			numNextQ = 13
 			break;
-		case "HadDeadSibChild":
-			if (lastAnswer == 'Y')
-				numNextQ = 15;
-			else
+		case "HadDeadSibKids":
+			if (lastAnswer.toLowerCase() == 'y')
 				numNextQ = 14;
+			else
+				numNextQ = 13;
 			break;
-		case "NumDeadSibChild":
-			numNextQ = 16;
+		case "NumDeadSibKids":
+			numNextQ = 15;
 			break;
-		case "NamesDeadSibChild":
-			numNextQ = 14
+		case "NamesDeadSibKids":
+			numNextQ = 13
 			break;
 		default:
 			numNextQ = -1;
@@ -185,11 +82,9 @@ function determineNextQuery(lastQuery, lastAnswer) {
 
 	var nextQuery = numNextQ == -1 ? null : qaTemplate[numNextQ];
 
-	if (numNextQ == 14) {
+	if (numNextQ == 13) {
 		var lastDsNum = qaProgress[qaProgress.length - 1]['dsnum'];
 		var numDeadSibs = getAnswerByQName("NumDeadSiblings");
-		console.log('lastDsNum', lastDsNum);
-		console.log('numDeadSibs', numDeadSibs);
 
 		if (lastDsNum && numDeadSibs && lastDsNum >= numDeadSibs)
 			return null;
@@ -202,7 +97,7 @@ function determineNextQuery(lastQuery, lastAnswer) {
 		nextQuery = populateDSNumToQuery(lastDsNum, nextQuery);
 	}
 
-	if (numNextQ == 15 || numNextQ == 16) {
+	if (numNextQ == 14 || numNextQ == 15) {
 		var lastDsNum = qaProgress[qaProgress.length - 1]['dsnum'];
 		if (lastDsNum) 
 			nextQuery = populateDSNumToQuery(lastDsNum, nextQuery);
@@ -236,9 +131,9 @@ function validateAnswer(answer, validNum) {
 		return false;
 	switch (validNum) {
 		case 1:
-			return answer=='M' || answer=='F';
+			return answer.toLowerCase()=='m' || answer.toLowerCase()=='f';
 		case 3:
-			return answer=='Y' || answer=='N';
+			return answer.toLowerCase()=='y' || answer.toLowerCase()=='n';
 		case 5:
 			return parseInt(answer) == answer;
 		default:
@@ -276,12 +171,59 @@ function showOutputString() {
 			strOutput += "The living siblings will each inherit 1/"+(numLivingSibs+numDeadSibs)+" of the estate.<br>";
 		}
 
-		if (qaProgress[i]['dsnum'] && qaProgress[i]['vname'] == 'NumDeadSibChild' && qaProgress[i]['value'] > 0) {
+		if (qaProgress[i]['dsnum'] && qaProgress[i]['vname'] == 'NumDeadSibKids' && qaProgress[i]['value'] > 0) {
 			strOutput += "The children of DEAD SIB "+qaProgress[i]['dsnum']+" will each inherit (1/"+(parseInt(getAnswerByQName('NumLivingSiblings'))+parseInt(getAnswerByQName('NumDeadSiblings')))+") * (1/"+parseInt(qaProgress[i]['value'])+").<br>";
 		}
 	}
 
 	$('.output').html(strOutput);
+}
+
+function processSubQuery() {
+	if ($('#txtAnswer').val().toLowerCase() != 'y')
+		return true;
+
+	var curQa = qaProgress[curStep]['subq'];
+	if (!$('#frm-subquery').is(":visible")) {
+		$('#frm-subquery').show();
+		$('#labelSubQ').html(curQa['q']);
+		$('#txtSubAnswer').attr('placeholder', ansValid[curQa['ph']]);
+		$('#txtSubAnswer').focus();
+		return;
+	}
+
+	if ( !(parseInt($('#txtSubAnswer').val().trim()) > 0) ) {
+		alert (ansValid[curQa['ph']]);
+		return;
+	}
+
+	if (!$('#div-sub-serial').is(":visible")) {
+		$('#div-sub-serial').show();
+		var cntSerial = parseInt($('#txtSubAnswer').val());
+		for (var i = 0; i < cntSerial; i++) {
+			$('#div-sub-serial').append(
+				"<input type='text' class='form-control answer-serial' num='"
+				+ i + "' placeholder='Name of Child " + (i+1) + "'>");
+		}
+		return;
+	}
+
+	if ( $('#div-sub-serial').is(":visible") ) {
+		var cntSerial = parseInt($('#txtSubAnswer').val());
+		var arrValAns = [];
+		for (var i = 0; i < cntSerial; i++) {
+			valAns = $(".answer-serial[num='"+i+"']").val().trim();
+			if (!valAns) {
+				alert ("Please fill every input!");
+				return;
+			}
+			arrValAns.push(valAns);
+		}
+
+		qaProgress[curStep]['subq']['value'] = arrValAns;
+		$('#frm-subquery').hide();
+		return true;
+	}
 }
 
 var curStep = 0;
@@ -290,6 +232,12 @@ $(document).ready(function(){
 	$('#txtAnswer').focus();
 
 	$('#btnNext').click(function() {
+		// detect if query has sub query
+		if (qaProgress[curStep]['subq']) {
+			if (!processSubQuery())
+				return;
+		}
+
 		if ( !validateAnswer( $('#txtAnswer').val(), qaProgress[curStep]['ph'] ) ) {
 			$('.form-group').addClass('has-error');
 			alert (ansValid[qaProgress[curStep]['ph']]);
@@ -305,6 +253,7 @@ $(document).ready(function(){
 		if (qaProgress[curStep+1] === null) {
 			showOutputString();
 			$('#btnNext').toggle(false);
+			console.log(qaProgress);
 			return;
 		}
 
@@ -366,7 +315,7 @@ $(document).ready(function(){
 		}
 		if (hasOutput) {
 			strOutput = qaProgress[0]['value'] + " who was a ";
-			strOutput += qaProgress[1]['value'] == 'M' ? 'male' : 'famale';
+			strOutput += qaProgress[1]['value'].toLowerCase() == 'm' ? 'male' : 'famale';
 			strOutput += " died on " + qaProgress[2]['value'];
 		}
 	}

@@ -51,3 +51,7 @@
     color: maroon;
     line-height: 25px;
 }
+.answer-serial {
+	width: 60% !important;
+    margin-top: 15px !important;
+}
